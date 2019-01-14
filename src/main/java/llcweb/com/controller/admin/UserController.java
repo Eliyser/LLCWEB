@@ -33,6 +33,13 @@ public class UserController {
     @Autowired
     private UsersService usersService;
 
+    /**
+     * @Author haien
+     * @Description 查找用户
+     * @Date 2019/1/14
+     * @Param [request, response]
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     **/
     @RequestMapping(value = "/page",method = RequestMethod.GET)
     @ResponseBody
     public Map<String,Object> page(HttpServletRequest request, HttpServletResponse response){
