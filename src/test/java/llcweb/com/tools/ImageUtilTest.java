@@ -10,7 +10,7 @@ public class ImageUtilTest {
     public static void main(String[] args) {
         String randomCode = CodeUtil.getRandomCode(4, null);
         System.out.println(randomCode);
-        BufferedImage imageFromCode = ImageUtil.getImageFromCode(randomCode, 100, 50, 3, true,
+        BufferedImage imageFromCode = ImageUtil.getImageFromCode(randomCode, 80, 40, 3, true,
                 Color.WHITE, Color.GRAY, Color.BLACK);
         try {
             File file = new File("d:/test01.jpg");

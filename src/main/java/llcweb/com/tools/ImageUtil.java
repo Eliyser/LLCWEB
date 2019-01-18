@@ -75,7 +75,7 @@ public class ImageUtil {
     }
     private static void shearY(Graphics g, int w1, int h1, Color color) {
         Random random=new Random();
-        int period = random.nextInt(40) + 10; // 50;
+        int period = random.nextInt(h1/4) + 10; // h1/2+10;越小扭曲程度越小，越不会超出图片范围
 
         boolean borderGap = true;
         int frames = 20;
@@ -85,6 +85,7 @@ public class ImageUtil {
                     * Math.sin((double) i / (double) period
                     + (2.2831853071795862D * (double) phase)/ (double) frames);
             g.copyArea(i, 0, 1, h1, 0, (int) d);
+            //copyArea(x,y,width,height,dx,dy);x,y:往左或向下，dx,dy:右或上,只能存在一对x,y;width,height:图片尺寸
             if (borderGap) {
                 g.setColor(color);
                 g.drawLine(i, (int) d, i, 0);
