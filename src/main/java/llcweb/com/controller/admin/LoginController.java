@@ -29,7 +29,7 @@ public class LoginController {
      * @return void
      **/
     @RequestMapping(value="/getImageCode",method = RequestMethod.GET)
-    public Map<String,Object> outputStream(HttpServletRequest request, HttpServletResponse response){
+    public Map<String,Object> getImageCode(HttpServletRequest request, HttpServletResponse response){
         Map<String,Object> map=new HashMap<>();
         try {
             // 设置浏览器不缓存本页
