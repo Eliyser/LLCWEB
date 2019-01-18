@@ -97,12 +97,13 @@ public class ValidatorUtil {
 	}
 
 	/**
-	 * 判断用户名格式是否正确(只能是数组、字母或者下划线)
+	 * 判断用户名格式是否正确(只能是数组、字母或者下划线，且不能超过15位)
 	 * @param username
 	 * @return
 	 */
 	public static boolean isUsername(String username){
 		if(StringUtils.isBlank(username))return false;
+		if(username.length()>15)return false;
 		String regEx="^[A-Za-z0-9_]+$";
 	    Pattern p=Pattern.compile(regEx);
 	    Matcher m=p.matcher(username);

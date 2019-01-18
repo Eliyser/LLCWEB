@@ -1,9 +1,4 @@
-package llcweb.com.domain.models; /***********************************************************************
- * Module:  Roles.java
- * Author:  Ricardo
- * Purpose: Defines the Class Roles
- ***********************************************************************/
-
+package llcweb.com.domain.models;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;

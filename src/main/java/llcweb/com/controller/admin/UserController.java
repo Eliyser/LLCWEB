@@ -1,19 +1,28 @@
 package llcweb.com.controller.admin;
 
+import llcweb.com.dao.repository.PeopleRepository;
+import llcweb.com.dao.repository.RolesRepository;
 import llcweb.com.dao.repository.UsersRepository;
+import llcweb.com.domain.models.Roles;
 import llcweb.com.domain.models.Users;
 import llcweb.com.service.UsersService;
 import llcweb.com.tools.PageParam;
+import llcweb.com.tools.StringUtil;
+import llcweb.com.tools.ValidatorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +34,7 @@ import java.util.Map;
  **/
 @Controller
 @RequestMapping("/users")
+@Transactional
 public class UserController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -32,6 +42,10 @@ public class UserController {
     private UsersRepository usersRepository;
     @Autowired
     private UsersService usersService;
+    @Resource
+    private PeopleRepository peopleRepository;
+    @Resource
+    private RolesRepository rolesRepository;
 
     /**
      * @Author haien
@@ -83,4 +97,83 @@ public class UserController {
         return map;
     }
 
+    @RequestMapping(value = "/save",method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String,Object> save(HttpServletRequest request){
+        Map<String,Object> map=new HashMap<>();
+
+        //用户id
+        String id=request.getParameter("id");
+
+        //用户名、密码、关联人员id、角色权限
+        String username=request.getParameter("username");
+        String password=request.getParameter("password");
+        String peopleId1=request.getParameter("peopleId");
+        String role=request.getParameter("role");
+        int peopleId=StringUtil.isNull(peopleId1)?0:Integer.parseInt(peopleId1); //id为null则非内部人员，赋默认值0
+
+        //参数验证
+        if(!ValidatorUtil.isUsername(username)){
+            map.put("result", 0);
+            map.put("message", "用户名只能是不能超过15位的数字、字母或下划线！");
+            return map;
+        }
+        if(!ValidatorUtil.isPasswd(password)){
+            map.put("result", 0);
+            map.put("message", "密码只能是6-12位的数字或字母！");
+            return map;
+        }
+        if(StringUtil.isNull(role)){
+            map.put("result", 0);
+            map.put("message", "请为用户分配权限！");
+            return map;
+        }
+        if(peopleId!=0) {
+            if (peopleRepository.findOne(peopleId) == null) {
+                map.put("result", 0);
+                map.put("message", "关联人员不存在！");
+                return map;
+            }
+        }
+
+        //更新
+        int userId;
+        Users users=usersRepository.findByUsername(username);
+        Roles roles=rolesRepository.findByRName(role);
+        int roleId=roles.getrId();
+        if(!StringUtil.isNull(id)&&(userId=Integer.parseInt(id))>0){
+            if(users!=null&&users.getId()!=userId){
+                map.put("result", 0);
+                map.put("message", "用户名已存在！");
+                return map;
+            }
+            logger.info("修改人员信息--id="+id);
+            int result = usersRepository.updateUsers(username,password,new Date(),peopleId,userId);
+            if(result==0){
+                map.put("result", 0);
+                map.put("message", "无该用户记录！");
+                return map;
+            }
+            usersRepository.updateUsersRoles(roleId,userId);
+        }
+        //添加
+        else {
+            if(users!=null){
+                map.put("result", 0);
+                map.put("message", "用户名已存在！");
+                return map;
+            }
+            logger.info("新增记录--username="+username+"peopleId="+peopleId+"role="+role);
+            usersRepository.saveUsers(username,password,new Date(),peopleId);
+            //获取新用户的id，username是唯一标识
+            userId=usersRepository.findByUsername(username).getId();
+            usersRepository.addUsersRoles(userId,roleId);
+        }
+
+        map.put("result", 1);
+        map.put("message", "用户保存成功！");
+        logger.info("用户保存成功！");
+
+        return map;
+    }
 }
