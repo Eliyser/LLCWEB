@@ -1,10 +1,12 @@
 package llcweb.com.controller.admin;
 
 import llcweb.com.dao.repository.PatentRepository;
+import llcweb.com.domain.entities.PageInfo;
 import llcweb.com.domain.entity.UsefulPatent;
 import llcweb.com.domain.models.Patent;
 import llcweb.com.service.PatentService;
 import llcweb.com.service.UsersService;
+import llcweb.com.tools.UsefulTools;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -64,9 +66,10 @@ public class PatentController {
 			map.put("message", "请正确指定读取数目！");
 		}else{
 			List<Patent> patents=patentRepository.getLatest(count);
+
 			map.put("result", 1);
 			map.put("message", "获取记录成功！");
-			map.put("data",patents);
+			map.put("data",UsefulTools.patentToProductInfo(patents));
 		}
 		return map;
 	}
@@ -240,17 +243,38 @@ public class PatentController {
     	patentRepository.save(patent);
     	
     	Patent newPatent = patentRepository.findOne(patent.getId());
-    	
-    	if(newPatent == null){
-        map.put("result", 1);
-        map.put("message", "成功保存项目！");
-        logger.info("成功保存项目！");
-    }else{
-        map.put("result", 0);
-        map.put("message", "保存项目失败！");
-        logger.error("保存项目失败！");
+
+		if(newPatent == null){
+			map.put("result", 1);
+			map.put("message", "成功保存项目！");
+			logger.info("成功保存项目！");
+		}else{
+			map.put("result", 0);
+			map.put("message", "保存项目失败！");
+			logger.error("保存项目失败！");
+		}
+		map.put("data",patent);
+		return map;
     }
-    map.put("data",patent);
-    return map;
-}
+	/**
+	 * @Author ricardo
+	 * @Description 分组获取项目
+	 * @Date 2018/10/10
+	 * @Param [count]
+	 * @return java.util.Map<java.lang.String,java.lang.Object>
+	 **/
+	@RequestMapping("/getPage")
+	@ResponseBody
+	public Map<String,Object> getPage(@RequestParam("pageNum")int pageNum,@RequestParam("pageSize")int pageSize){
+		Map<String,Object> map=new HashMap<>();
+		logger.info(",pageNum="+pageNum+",pageSize="+pageSize);
+
+		Page<Patent> projectPage = patentService.getPage(pageNum-1,pageSize);
+		PageInfo pageInfo = new PageInfo(0,UsefulTools.patentToProductInfo(projectPage.getContent()),projectPage.getNumberOfElements());
+
+		map.put("result", 1);
+		map.put("message", "获取记录成功！");
+		map.put("data",pageInfo);
+		return map;
+	}
 }
