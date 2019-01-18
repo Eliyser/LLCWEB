@@ -177,6 +177,28 @@ public class UserController {
         return map;
     }
 
+    /**
+     * @Author haien
+     * @Description 普通用户修改密码
+     * @Date 2019/1/18
+     * @Param [id, password]
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     **/
+    @RequestMapping(value = "/updatePassword",method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String,Object> updatePassword(@RequestParam("id")Integer id,String password){
+        Map<String,Object> map=new HashMap<>();
+        if (!ValidatorUtil.isPasswd(password)) {
+            map.put("result", 0);
+            map.put("message", "密码只能是6-12位的数字或字母！");
+            return map;
+        }
+        usersRepository.updatePassword(password,id);
+        map.put("result", 1);
+        map.put("message", "修改密码成功！");
+        return map;
+    }
+
     @RequestMapping(value = "/isCurrentUserHasRole",method = RequestMethod.GET)
     @ResponseBody
     public Map<String,Object> delete(@RequestParam("role")String role){

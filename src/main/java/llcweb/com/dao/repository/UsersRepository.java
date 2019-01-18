@@ -84,4 +84,9 @@ public interface UsersRepository extends JpaRepository<Users,Integer>{ //Integer
     @Transactional
     @Query(value = "update users_roles set ur_role_id=?1 where ur_user_id=?2",nativeQuery = true)
     int updateUsersRoles(int roleId,int userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "update users set password=SUBSTRING(md5(?1),1,16) where id=?2",nativeQuery = true)
+    int updatePassword(String password,int id);
 }
